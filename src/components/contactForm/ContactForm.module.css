@@ -1,0 +1,23 @@
+.addForm {
+    width: 300px;
+    padding: 10px;
+    border: 1px solid black;
+    margin-bottom: 20px;
+}
+
+.label {
+    & p {
+        font-size: 18px;
+        margin-bottom: 5px;
+        }
+    & input {
+        width: 210px;
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+}
+
+.btn {
+    width: 50%;
+    text-align: center;
+}

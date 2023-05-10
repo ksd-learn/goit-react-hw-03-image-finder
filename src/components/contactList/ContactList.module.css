@@ -1,0 +1,8 @@
+.user {
+    display: flex;
+    margin-top: 10px;
+}
+
+.btn {
+    font-size: 11px;
+}
