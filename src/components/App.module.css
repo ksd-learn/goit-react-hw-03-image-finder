@@ -1,7 +1,0 @@
-.phonebook {
-    margin-top: 20px;
-    margin-left: 20px;
-    & h1, h2 {
-        margin-bottom: 10px;
-    }
-}
