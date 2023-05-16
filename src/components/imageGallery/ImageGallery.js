@@ -18,13 +18,17 @@ export class ImageGallery extends Component {
         showModal: false,
         error: 'null'
     };
-                                                    // метод записи в state
+                                                    // добавление полученной страницы в state
     addPage = (dataPage) => {
         this.setState(
             (prevstate) => {
                 if (dataPage.length > 0) {
-                    const newData = prevstate.data.concat(dataPage);
-                    return { data: newData}
+                    if (this.state.page === 1) {
+                        return {data: dataPage}
+                    } else {
+                        const newData = prevstate.data.concat(dataPage);
+                        return { data: newData}
+                    }
                 }
             }
         )
@@ -38,46 +42,47 @@ export class ImageGallery extends Component {
                     webformatURL: item.webformatURL,
                     largeImageURL: item.largeImageURL,
                     user: item.user
-            }})
+                }
+            })
         )
-    }
-                                                    // подготовка и запись в state данных, полученных с сервера API 
+    };
+                                        // подготовка и запись в state данных, полученных с сервера API 
     dataQueryApi = (page) => {
         let queryValue = this.props.nameSearch;
-        let url = apiPixabay(queryValue, page);
+        let url = apiPixabay(queryValue, page);     //html  запроса
 
-        queryApi(url)
+        queryApi(url)                               //запрос > анализ данных > запись в state
             .then(dataPage => {
-                if (dataPage.length > 0){
+                if (dataPage.length > 0) {
                     return this.patternPage(dataPage)
                 } else {
                     return Promise.reject(new Error("Поиск завершен"))
-                }  
+                }
             })
             .then((dataPattern => this.addPage(dataPattern)))
             .catch(error => this.setState({ error }))
             .finally(() => this.setState({ status: 'resolved' }))
-    }
+    };
                                                     // действие кнопки "Load more"
     handlBtnLoadMore = () => {
-        let newPage = this.state.page + 1;
-        this.setState({ status: 'pending', page: newPage });
-        this.dataQueryApi(newPage);
-    }
+        this.setState((prevState) => {
+            return { status: 'pending', page: prevState.page + 1 }
+        })
+    };
     
-                                                    // условия обработки данных запроса
+                                                    // управление модальным окном (откр/закр)
     switchModal = (id) => {
         this.setState(({ showModal }) => (
             { idImgModal: id, showModal: !showModal }
         ))
-    }
-
+    };
+                                                    // действие после render
     componentDidUpdate(prevProps, prevState) {
         let queryValue = this.props.nameSearch;
+        let {page, error} = this.state;
 
-        if (prevProps.nameSearch !== queryValue) {
+        if (prevProps.nameSearch !== queryValue) {          //новая тема
             this.setState({
-                    data: [],
                     status: 'pending',
                     page: 1,
                     showModal: false,
@@ -86,27 +91,35 @@ export class ImageGallery extends Component {
             this.dataQueryApi(1);
         }
 
-        if (this.state.error.message === "Поиск завершен") {
+        if (prevState.page !== page && page > 1) {  //следующая страница
+            this.dataQueryApi(page)
+        }
+
+        if ( prevState.error!== error && error.message === "Поиск завершен") {
             this.setState({
                     status: 'start',
-                    page: 1,
-                    error: 'null'
             });
         }
-    }
+    };
     
     render() {
 
-        let { data, status, idImgModal, showModal } = this.state;
+        let { data, status, idImgModal, showModal, error } = this.state;
         const dataPhoto = data.find(item => item.id === idImgModal);
 
         return (
             <section className={css.sectionGallery}>
                 <ul className={css.imageGallery}>
-                    <ImageGalleryItem data={data} onOpen={this.switchModal} />
-                </ul>
+                    {data.map((item) => {
+                        return (
+                            <ImageGalleryItem key={item.id} item={item} onOpen={this.switchModal} />
+                    )})}
+                </ul>                
+                
+                {(data.length === 0 && error.message === "Поиск завершен")
+                    && <p>"Поиск завершен"</p> }
 
-                { (status === 'pending' || status === 'resolved')
+                {status === 'resolved'
                     && <Button onClick={this.handlBtnLoadMore} />}
 
                 {status === 'pending'
