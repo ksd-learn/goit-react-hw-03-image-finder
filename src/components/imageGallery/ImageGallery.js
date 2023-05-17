@@ -83,6 +83,7 @@ export class ImageGallery extends Component {
 
         if (prevProps.nameSearch !== queryValue) {          //новая тема
             this.setState({
+                    data: [],
                     status: 'pending',
                     page: 1,
                     showModal: false,
@@ -109,24 +110,25 @@ export class ImageGallery extends Component {
 
         return (
             <section className={css.sectionGallery}>
-                <ul className={css.imageGallery}>
-                    {data.map((item) => {
+                {data.length > 0 &&
+                    <ul className={css.imageGallery}>
+                        {data.map((item) => {
                         return (
                             <ImageGalleryItem key={item.id} item={item} onOpen={this.switchModal} />
-                    )})}
-                </ul>                
+                        )})}
+                    </ul>}                
                 
-                {(data.length === 0 && error.message === "Поиск завершен")
-                    && <p>"Поиск завершен"</p> }
+                {(data.length === 0 && error.message === "Поиск завершен") &&
+                    <p>"Поиск завершен"</p>}
 
-                {status === 'resolved'
-                    && <Button onClick={this.handlBtnLoadMore} />}
+                {status === 'resolved' && 
+                    <Button onClick={this.handlBtnLoadMore} />}
 
-                {status === 'pending'
-                    && <Loader />}
+                {status === 'pending' && 
+                    <Loader />}
 
-                {showModal
-                    && <Modal dataPhoto={dataPhoto} onClose={this.switchModal} />}
+                {showModal && 
+                    <Modal dataPhoto={dataPhoto} onClose={this.switchModal} />}
             </section>
         )
     }
